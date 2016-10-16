@@ -48,7 +48,8 @@ app.component('map', {
           position: coordinates,
           map: $rootScope.map,
           zIndex: 99,
-          icon: icon
+          icon: icon,
+          animation: google.maps.Animation.DROP
         });
       }
 

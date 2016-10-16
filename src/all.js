@@ -22,42 +22,6 @@ var app = angular.module('musicMap', ['firebase', 'ngMaterial'])
 
 }]);
 
-app.component('mdHeader', {
-  templateUrl: '/components/header/header.html',
-  controller: ['$firebaseAuth', '$firebaseObject', '$rootScope', function($firebaseAuth, $firebaseObject, $rootScope) {
-
-    var ctrl = this;
-
-    $rootScope.authObj = $firebaseAuth();
-
-    ctrl.signIn = function() {
-
-      ctrl.currentUser = {};
-
-      $rootScope.authObj.$signInWithPopup("google").then(function(result) {
-        console.log("Signed in as:", result.user.uid);
-        console.log('user', result.user);
-
-        $rootScope.currentUser.uid = result.user.uid;
-        $rootScope.currentUser.displayName = result.user.displayName;
-        $rootScope.currentUser.photoURL = result.user.photoURL;
-
-        ctrl.currentUser.uid = $rootScope.currentUser.uid;
-        ctrl.currentUser.displayName = $rootScope.currentUser.displayName;
-        ctrl.currentUser.photoURL = $rootScope.currentUser.photoURL;
-
-        $rootScope.users[result.user.uid] = {
-          displayName: result.user.displayName,
-          photoURL: result.user.photoURL
-        }
-        $rootScope.users.$save();
-
-      }).catch(function(error) {
-        console.error("Authentication failed:", error);
-      });
-    }
-  }]
-});
 app.component('map', {
   templateUrl: '/components/map/map.html',
   controller: ['$mdSidenav', '$rootScope', '$interval', function($mdSidenav, $rootScope, $interval) {
@@ -108,7 +72,8 @@ app.component('map', {
           position: coordinates,
           map: $rootScope.map,
           zIndex: 99,
-          icon: icon
+          icon: icon,
+          animation: google.maps.Animation.DROP
         });
       }
 
@@ -203,16 +168,40 @@ app.component('map', {
     });
   }]
 });
-app.component('player', {
-  templateUrl: '/components/player/player.html',
-  controller: ['$rootScope', function($rootScope) {
+app.component('mdHeader', {
+  templateUrl: '/components/header/header.html',
+  controller: ['$firebaseAuth', '$firebaseObject', '$rootScope', function($firebaseAuth, $firebaseObject, $rootScope) {
 
-  	$rootScope.setStation = function(url) {
-	    document.getElementById('player').setAttribute('src', url + 
-	          '&amp;auto_play=true&amp;hide_related=true&amp;show_comments=fakse&amp;show_user=faslse&amp;show_reposts=false&amp;visual=true');
+    var ctrl = this;
 
-	    $rootScope.nowPlaying = url;
-	  }
+    $rootScope.authObj = $firebaseAuth();
+
+    ctrl.signIn = function() {
+
+      ctrl.currentUser = {};
+
+      $rootScope.authObj.$signInWithPopup("google").then(function(result) {
+        console.log("Signed in as:", result.user.uid);
+        console.log('user', result.user);
+
+        $rootScope.currentUser.uid = result.user.uid;
+        $rootScope.currentUser.displayName = result.user.displayName;
+        $rootScope.currentUser.photoURL = result.user.photoURL;
+
+        ctrl.currentUser.uid = $rootScope.currentUser.uid;
+        ctrl.currentUser.displayName = $rootScope.currentUser.displayName;
+        ctrl.currentUser.photoURL = $rootScope.currentUser.photoURL;
+
+        $rootScope.users[result.user.uid] = {
+          displayName: result.user.displayName,
+          photoURL: result.user.photoURL
+        }
+        $rootScope.users.$save();
+
+      }).catch(function(error) {
+        console.error("Authentication failed:", error);
+      });
+    }
   }]
 });
 app.component('sidenav', {
@@ -284,5 +273,17 @@ app.component('sidenav', {
             '&amp;auto_play=true&amp;hide_related=true&amp;show_comments=fakse&amp;show_user=faslse&amp;show_reposts=false&amp;visual=true');
     }
 
+  }]
+});
+app.component('player', {
+  templateUrl: '/components/player/player.html',
+  controller: ['$rootScope', function($rootScope) {
+
+  	$rootScope.setStation = function(url) {
+	    document.getElementById('player').setAttribute('src', url + 
+	          '&amp;auto_play=true&amp;hide_related=true&amp;show_comments=fakse&amp;show_user=faslse&amp;show_reposts=false&amp;visual=true');
+
+	    $rootScope.nowPlaying = url;
+	  }
   }]
 });

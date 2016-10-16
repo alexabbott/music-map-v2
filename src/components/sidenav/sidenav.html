@@ -24,7 +24,10 @@
 				<md-input-container layout="row">
 					<input type="url" placeholder="Soundcloud URL" ng-model="$ctrl.currentUser.stationUrl">
 				</md-input-container>
-				<md-button class="md-raised md-primary bottom-button" ng-click="$ctrl.submitStation()">{{$ctrl.submitStatus}}</md-button>
+				<div class="bottom-button">
+					<md-button ng-click="createStation = false">Cancel</md-button>
+					<md-button class="md-raised md-primary" ng-click="$ctrl.submitStation()">{{$ctrl.submitStatus}}</md-button>
+				</div>
 			</form>
 		</section>
 
