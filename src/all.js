@@ -58,6 +58,108 @@ app.component('mdHeader', {
     }
   }]
 });
+app.component('player', {
+  templateUrl: '/components/player/player.html',
+  controller: ['$rootScope', '$window', function($rootScope, $window) {
+
+  	var ctrl = this;
+
+  	if ($window.innerWidth < 768) {
+		  angular.element(document.querySelector('.play')).css('display', 'block');
+  	}
+
+  	$rootScope.setStation = function(url) {
+	    document.getElementById('player').setAttribute('src', url + 
+	          '&amp;auto_play=true&amp;hide_related=true&amp;show_comments=fakse&amp;show_user=faslse&amp;show_reposts=false&amp;visual=true');
+
+	    $rootScope.nowPlaying = url;
+	  }
+
+
+	  ctrl.play = function() {
+      var iframeElement   = document.getElementById('player');
+      var iframeElementID = iframeElement.id;
+      var widget1         = SC.Widget(iframeElement);
+      console.log('play');
+      widget1.play();
+
+		  angular.element(document.querySelector('.play')).css('display', 'none');
+    };
+  }]
+});
+app.component('sidenav', {
+  templateUrl: '/components/sidenav/sidenav.html',
+  controller: ['$timeout', '$rootScope', '$mdSidenav', '$firebaseArray', '$mdToast', function($timeout, $rootScope, $mdSidenav, $firebaseArray, $mdToast) {
+
+    var ctrl = this;
+    ctrl.stations = $rootScope.stationsInRange;
+
+    ctrl.submitStatus = 'Submit';
+
+    ctrl.submitStation = function() {
+
+      if ($rootScope.currentUser.uid) {
+        $rootScope.stations.$add({ 
+          name: ctrl.currentUser.stationName,
+          tags: ctrl.currentUser.stationTags,
+          url: ctrl.currentUser.stationUrl,
+          radius: 200,
+          coordinates: {
+            lat: $rootScope.currentUser.coordinates.lat,
+            lng: $rootScope.currentUser.coordinates.lng,
+          },
+          user: {
+            uid: $rootScope.currentUser.uid,
+            displayName: $rootScope.currentUser.displayName,
+          }
+        });
+
+        $rootScope.currentUser.stations = $firebaseArray($rootScope.ref.child("user-stations/" + $rootScope.currentUser.uid));
+
+        $rootScope.currentUser.stations.$add({
+          name: ctrl.currentUser.stationName,
+          tags: ctrl.currentUser.stationTags,
+          url: ctrl.currentUser.stationUrl,
+          radius: 200,
+          coordinates: {
+            lat: $rootScope.currentUser.coordinates.lat,
+            lng: $rootScope.currentUser.coordinates.lng,
+          }
+        }).then(function(ref) {
+          // reset inputs
+          ctrl.currentUser.stationName = '';
+          ctrl.currentUser.stationTags = '';
+          ctrl.currentUser.stationUrl = '';
+
+          // show toast and close side nav
+          $mdSidenav('right').close();
+          $mdToast.show(
+            $mdToast.simple()
+              .textContent('Station saved successfully!')
+              .hideDelay(3000)
+          );
+        }, function(error) {
+          console.log("Error:", error);
+        });
+
+      } else {
+        alert('You must be signed in to submit a station!');
+      }
+    }
+
+    $rootScope.$watch('nowPlaying', function() {
+      ctrl.nowPlaying = $rootScope.nowPlaying;
+    });
+
+    ctrl.selectStation = function(url) {
+      document.getElementById('player').setAttribute('src', url + 
+            '&amp;auto_play=true&amp;hide_related=true&amp;show_comments=fakse&amp;show_user=faslse&amp;show_reposts=false&amp;visual=true');
+
+      angular.element(document.querySelector('.play')).css('display','block');
+    }
+
+  }]
+});
 app.component('map', {
   templateUrl: '/components/map/map.html',
   controller: ['$mdSidenav', '$rootScope', '$interval', function($mdSidenav, $rootScope, $interval) {
@@ -109,8 +211,7 @@ app.component('map', {
           map: $rootScope.map,
           zIndex: 99,
           icon: icon,
-          animation: google.maps.Animation.DROP,
-          draggable: true
+          animation: google.maps.Animation.DROP
         });
       }
 
@@ -209,107 +310,5 @@ app.component('map', {
         $rootScope.addStationMarker($rootScope.stations[newStationIndex].coordinates, '#2D8A79', $rootScope.stations[newStationIndex].radius, stationIcon, $rootScope.stations[newStationIndex].name);
       }
     });
-  }]
-});
-app.component('sidenav', {
-  templateUrl: '/components/sidenav/sidenav.html',
-  controller: ['$timeout', '$rootScope', '$mdSidenav', '$firebaseArray', '$mdToast', function($timeout, $rootScope, $mdSidenav, $firebaseArray, $mdToast) {
-
-    var ctrl = this;
-    ctrl.stations = $rootScope.stationsInRange;
-
-    ctrl.submitStatus = 'Submit';
-
-    ctrl.submitStation = function() {
-
-      if ($rootScope.currentUser.uid) {
-        $rootScope.stations.$add({ 
-          name: ctrl.currentUser.stationName,
-          tags: ctrl.currentUser.stationTags,
-          url: ctrl.currentUser.stationUrl,
-          radius: 200,
-          coordinates: {
-            lat: $rootScope.currentUser.coordinates.lat,
-            lng: $rootScope.currentUser.coordinates.lng,
-          },
-          user: {
-            uid: $rootScope.currentUser.uid,
-            displayName: $rootScope.currentUser.displayName,
-          }
-        });
-
-        $rootScope.currentUser.stations = $firebaseArray($rootScope.ref.child("user-stations/" + $rootScope.currentUser.uid));
-
-        $rootScope.currentUser.stations.$add({
-          name: ctrl.currentUser.stationName,
-          tags: ctrl.currentUser.stationTags,
-          url: ctrl.currentUser.stationUrl,
-          radius: 200,
-          coordinates: {
-            lat: $rootScope.currentUser.coordinates.lat,
-            lng: $rootScope.currentUser.coordinates.lng,
-          }
-        }).then(function(ref) {
-          // reset inputs
-          ctrl.currentUser.stationName = '';
-          ctrl.currentUser.stationTags = '';
-          ctrl.currentUser.stationUrl = '';
-
-          // show toast and close side nav
-          $mdSidenav('right').close();
-          $mdToast.show(
-            $mdToast.simple()
-              .textContent('Station saved successfully!')
-              .hideDelay(3000)
-          );
-        }, function(error) {
-          console.log("Error:", error);
-        });
-
-      } else {
-        alert('You must be signed in to submit a station!');
-      }
-    }
-
-    $rootScope.$watch('nowPlaying', function() {
-      ctrl.nowPlaying = $rootScope.nowPlaying;
-    });
-
-    ctrl.selectStation = function(url) {
-      document.getElementById('player').setAttribute('src', url + 
-            '&amp;auto_play=true&amp;hide_related=true&amp;show_comments=fakse&amp;show_user=faslse&amp;show_reposts=false&amp;visual=true');
-
-      angular.element(document.querySelector('.play')).css('display','block');
-    }
-
-  }]
-});
-app.component('player', {
-  templateUrl: '/components/player/player.html',
-  controller: ['$rootScope', '$window', function($rootScope, $window) {
-
-  	var ctrl = this;
-
-  	if ($window.innerWidth < 768) {
-		  angular.element(document.querySelector('.play')).css('display', 'block');
-  	}
-
-  	$rootScope.setStation = function(url) {
-	    document.getElementById('player').setAttribute('src', url + 
-	          '&amp;auto_play=true&amp;hide_related=true&amp;show_comments=fakse&amp;show_user=faslse&amp;show_reposts=false&amp;visual=true');
-
-	    $rootScope.nowPlaying = url;
-	  }
-
-
-	  ctrl.play = function() {
-      var iframeElement   = document.getElementById('player');
-      var iframeElementID = iframeElement.id;
-      var widget1         = SC.Widget(iframeElement);
-      console.log('play');
-      widget1.play();
-
-		  angular.element(document.querySelector('.play')).css('display', 'none');
-    };
   }]
 });

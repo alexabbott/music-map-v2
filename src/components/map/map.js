@@ -49,8 +49,7 @@ app.component('map', {
           map: $rootScope.map,
           zIndex: 99,
           icon: icon,
-          animation: google.maps.Animation.DROP,
-          draggable: true
+          animation: google.maps.Animation.DROP
         });
       }
 
