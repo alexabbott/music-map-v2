@@ -1,3 +1,7 @@
+md-sidenav .md-sidenav-inner .browse .station {
+  transition: 0.2s ease-out;
+}
+
 #map {
   height: 72%;
   width: 100vw;
@@ -7,6 +11,15 @@
   bottom: 0;
   border: 0;
   height: 20vh;
+  position: fixed;
+  width: 100vw;
+}
+
+.play {
+  bottom: 0;
+  display: none;
+  height: 20vh;
+  margin: 0;
   position: fixed;
   width: 100vw;
 }
@@ -54,7 +67,6 @@ md-sidenav .md-sidenav-inner .browse .station {
   margin-left: 0;
   padding: 10px 0;
   text-align: center;
-  transition: .2s ease-out;
   transition-property: background, color;
   width: 100%;
 }

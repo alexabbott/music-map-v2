@@ -1,6 +1,12 @@
 app.component('player', {
   templateUrl: '/components/player/player.html',
-  controller: ['$rootScope', function($rootScope) {
+  controller: ['$rootScope', '$window', function($rootScope, $window) {
+
+  	var ctrl = this;
+
+  	if ($window.innerWidth < 768) {
+		  angular.element(document.querySelector('.play')).css('display', 'block');
+  	}
 
   	$rootScope.setStation = function(url) {
 	    document.getElementById('player').setAttribute('src', url + 
@@ -8,5 +14,16 @@ app.component('player', {
 
 	    $rootScope.nowPlaying = url;
 	  }
+
+
+	  ctrl.play = function() {
+      var iframeElement   = document.getElementById('player');
+      var iframeElementID = iframeElement.id;
+      var widget1         = SC.Widget(iframeElement);
+      console.log('play');
+      widget1.play();
+
+		  angular.element(document.querySelector('.play')).css('display', 'none');
+    };
   }]
 });

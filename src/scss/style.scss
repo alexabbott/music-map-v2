@@ -1,3 +1,37 @@
+@mixin mobile {
+  @media (min-width: #{480px}) {
+      @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: #{768px}) {
+      @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: #{1144px}) {
+      @content;
+  }
+}
+
+@mixin monitor {
+  @media (min-width: #{1280px}) {
+      @content;
+  }
+}
+
+@mixin xl {
+  @media (min-width: #{1920px}) {
+      @content;
+  }
+}
+
+%transition {
+  transition: 0.2s ease-out;
+}
+
 $colorPrimary: #3F51B5;
 
 #map {
@@ -9,6 +43,15 @@ $colorPrimary: #3F51B5;
 	bottom: 0;
 	border: 0;
 	height: 20vh;
+	position: fixed;
+	width: 100vw;
+}
+
+.play {
+	bottom: 0;
+	display: none;
+	height: 20vh;
+	margin: 0;
 	position: fixed;
 	width: 100vw;
 }
@@ -50,6 +93,7 @@ md-sidenav {
 
 		.browse {
 			.station {
+				@extend %transition;
 				background: #eee;
 				box-sizing: border-box;
 				cursor: pointer;
@@ -57,7 +101,6 @@ md-sidenav {
 				margin-left: 0;
 				padding: 10px 0;
 				text-align: center;
-				transition: .2s ease-out;
 				transition-property: background, color;
 				width: 100%;
 
