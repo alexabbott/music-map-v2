@@ -1,6 +1,6 @@
 app.component('sidenav', {
   templateUrl: '/components/sidenav/sidenav.html',
-  controller: ['$timeout', '$rootScope', '$mdSidenav', '$firebaseObject', '$mdToast', function($timeout, $rootScope, $mdSidenav, $firebaseObject, $mdToast) {
+  controller: ['$timeout', '$rootScope', '$mdSidenav', '$firebaseArray', '$mdToast', function($timeout, $rootScope, $mdSidenav, $firebaseArray, $mdToast) {
 
     var ctrl = this;
     ctrl.stations = $rootScope.stationsInRange;
@@ -25,9 +25,10 @@ app.component('sidenav', {
           }
         });
 
-        $rootScope.currentUser.stations = $firebaseObject($rootScope.ref.child("user-stations/" + $rootScope.currentUser.uid));
+        $rootScope.currentUser.stations = $firebaseArray($rootScope.ref.child("user-stations/" + $rootScope.currentUser.uid));
 
-        $rootScope.currentUser.stations[ctrl.currentUser.stationName] = {
+        $rootScope.currentUser.stations.$add({
+          name: ctrl.currentUser.stationName,
           tags: ctrl.currentUser.stationTags,
           url: ctrl.currentUser.stationUrl,
           radius: 200,
@@ -35,9 +36,7 @@ app.component('sidenav', {
             lat: $rootScope.currentUser.coordinates.lat,
             lng: $rootScope.currentUser.coordinates.lng,
           }
-        };
-
-        $rootScope.currentUser.stations.$save().then(function(ref) {
+        }).then(function(ref) {
           // reset inputs
           ctrl.currentUser.stationName = '';
           ctrl.currentUser.stationTags = '';

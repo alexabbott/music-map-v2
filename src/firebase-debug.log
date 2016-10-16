@@ -1,0 +1,14 @@
+[debug] ----------------------------------------------------------------------
+[debug] Command:      /usr/local/bin/node /usr/local/bin/firebase serve
+[debug] CLI Version:  3.0.7
+[debug] Platform:     darwin
+[debug] Node Version: v4.2.1
+[debug] Time:         Sun Oct 16 2016 19:18:53 GMT-0400 (EDT)
+[debug] ----------------------------------------------------------------------
+[debug] 
+[info] Starting Firebase development server...
+[info] 
+[info] Project Directory: /Users/Alex/Documents/new-apps/music-map-v2/src
+[info] Public Directory: ./
+[info] 
+[info] Server listening at: http://localhost:5000
