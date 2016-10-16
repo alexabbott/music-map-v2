@@ -1,10 +1,9 @@
 app.component('map', {
   templateUrl: '/components/map/map.html',
-  controller: ['$mdSidenav', '$rootScope', function($mdSidenav, $rootScope) {
+  controller: ['$mdSidenav', '$rootScope', '$interval', function($mdSidenav, $rootScope, $interval) {
     var ctrl = this;
 
     $rootScope.stationsInRange = [];
-    $rootScope.stationsNotInRange = [];
 
     function initMap() {
       $rootScope.map = new google.maps.Map(document.querySelector('#map'), {
@@ -15,12 +14,11 @@ app.component('map', {
 
       var infowindow = new google.maps.InfoWindow();
 
-      $rootScope.addMarker = function(coordinates, color, zIndex, radius, icon, name) {
+      $rootScope.addStationMarker = function(coordinates, color, radius, icon, name) {
         var marker = new google.maps.Marker({
           position: coordinates,
           map: $rootScope.map,
-          title: 'Hello World!',
-          zIndex: zIndex,
+          zIndex: 1,
           icon: icon
         });
 
@@ -45,43 +43,68 @@ app.component('map', {
         });
       }
 
-      function checkStationsInRange() {
-        for (var i = 0; i < $rootScope.stations.length; i++) {
-          var stationLatLng = new google.maps.LatLng($rootScope.stations[i].coordinates.lat, $rootScope.stations[i].coordinates.lng);
-
-          // check to see which stations are in range
-          if (google.maps.geometry.spherical.computeDistanceBetween($rootScope.currentUser.latLng, stationLatLng) < $rootScope.stations[i].radius) {
-            $rootScope.stationsInRange.push($rootScope.stations[i]);
-          } else if (google.maps.geometry.spherical.computeDistanceBetween($rootScope.currentUser.latLng, stationLatLng) > $rootScope.stations[i].radius) {
-            $rootScope.stationsNotInRange.push($rootScope.stations[i]);
-          }
-        }
+      $rootScope.addUserMarker = function(coordinates, icon) {
+        $rootScope.currentUser.marker = new google.maps.Marker({
+          position: coordinates,
+          map: $rootScope.map,
+          zIndex: 99,
+          icon: icon
+        });
       }
 
       $rootScope.stations.$loaded()
         .then(function(data) {
 
+          $rootScope.currentUser = {};
+
+          function checkStationsInRange() {
+            for (var i = 0; i < $rootScope.stations.length; i++) {
+              var stationLatLng = new google.maps.LatLng($rootScope.stations[i].coordinates.lat, $rootScope.stations[i].coordinates.lng);
+
+              // check to see which stations are in range
+              if (google.maps.geometry.spherical.computeDistanceBetween($rootScope.currentUser.latLng, stationLatLng) < $rootScope.stations[i].radius) {
+                if ($rootScope.stationsInRange.indexOf($rootScope.stations[i]) === -1) {
+                  $rootScope.stationsInRange.push($rootScope.stations[i]);
+                }
+              } else {
+                if ($rootScope.stationsInRange.indexOf($rootScope.stations[i]) > -1) {
+                  $rootScope.stationsInRange.splice($rootScope.stationsInRange.indexOf($rootScope.stations[i]), 1);
+                }
+              }
+            }
+          }
+
+          function setUserCoordinates() {
+            $rootScope.currentUser.latLng = new google.maps.LatLng($rootScope.currentUser.coordinates.lat, $rootScope.currentUser.coordinates.lng);
+            $rootScope.map.setCenter($rootScope.currentUser.coordinates);
+            checkStationsInRange();
+          }
+
           if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
-
-              $rootScope.currentUser = {};
 
               $rootScope.currentUser.coordinates = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
               };
-              $rootScope.currentUser.latLng = new google.maps.LatLng($rootScope.currentUser.coordinates.lat, $rootScope.currentUser.coordinates.lng);
-
-              $rootScope.map.setCenter($rootScope.currentUser.coordinates);
-
-              $rootScope.addMarker($rootScope.currentUser.coordinates, '#FF0000', 99, 0);
-
-              checkStationsInRange();
+              setUserCoordinates();
+              $rootScope.addUserMarker($rootScope.currentUser.coordinates);
 
               // if there's a station in range, start playing it immediately
-              if ($rootScope.stationsInRange) {
+              if ($rootScope.stationsInRange.length > 0) {
                 $rootScope.setStation($rootScope.stationsInRange[0].url);
               }
+
+              // check user's location every 5 seconds
+              $interval(function(){
+                $rootScope.currentUser.coordinates = {
+                  lat: position.coords.latitude,
+                  lng: position.coords.longitude
+                };
+                setUserCoordinates();
+                $rootScope.currentUser.marker.setPosition($rootScope.currentUser.latLng);
+                console.log('update user location', $rootScope.currentUser.coordinates);
+              },5000);
 
             }, function() {
               // handleLocationError(true, infoWindow, map.getCenter());
@@ -90,15 +113,16 @@ app.component('map', {
             // Browser doesn't support Geolocation
             // handleLocationError(false, infoWindow, map.getCenter());
           }
-
         })
         .catch(function(error) {
           console.error("Error:", error);
         });
     }
 
+    // immediately initalize map and set markers
     initMap();
 
+    // open side menu
     ctrl.openMenu = function() {
       $mdSidenav('right').open();
     };
@@ -108,13 +132,13 @@ app.component('map', {
       size: new google.maps.Size(25, 25),
       origin: new google.maps.Point(0, 0),
       anchor: new google.maps.Point(12, 12)
-    }
+    };
 
     // add markers as the stations are retrieved from the database
     $rootScope.stations.$watch(function(event) {
       if (event.event === 'child_added') {
         var newStationIndex = $rootScope.stations.$indexFor(event.key);
-        $rootScope.addMarker($rootScope.stations[newStationIndex].coordinates, '#2D8A79', 1, $rootScope.stations[newStationIndex].radius, stationIcon, $rootScope.stations[newStationIndex].name);
+        $rootScope.addStationMarker($rootScope.stations[newStationIndex].coordinates, '#2D8A79', $rootScope.stations[newStationIndex].radius, stationIcon, $rootScope.stations[newStationIndex].name);
       }
     });
   }]
