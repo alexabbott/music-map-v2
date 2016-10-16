@@ -1,0 +1,12 @@
+<md-toolbar class="md-hue-2">
+  <div class="md-toolbar-tools">
+    <h2>
+      <span>Music Map</span>
+    </h2>
+    <span flex></span>
+    <md-button class="md-primary md-raised" aria-label="Sign In" ng-click="$ctrl.signIn()" ng-hide="$ctrl.currentUser.uid">
+      Sign In
+    </md-button>
+    <img src="{{$ctrl.currentUser.photoURL}}" class="profile-photo" ng-show="$ctrl.currentUser.uid">
+  </div>
+</md-toolbar>

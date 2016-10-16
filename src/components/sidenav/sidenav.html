@@ -1,0 +1,33 @@
+<md-sidenav class="md-sidenav-right" md-component-id="right">
+
+	<md-toolbar>
+		<h1 class="md-toolbar-tools">Stations in Range</h1>
+	</md-toolbar>
+
+	<md-content class="md-sidenav-inner">
+
+		<section class="browse" ng-hide="createStation === true">
+			<md-button layout="row" ng-repeat="station in $ctrl.stations" class="station" ng-click="$ctrl.selectStation(station.url); $ctrl.nowPlaying = station.url" ng-class="{playing: $ctrl.nowPlaying === station.url}">
+				<strong>{{ station.name }}</strong> ({{station.tags}})
+			</md-button>
+			<md-button class="md-primary md-raised bottom-button" ng-click="createStation = true">Create Station</md-button>
+		</section>
+
+		<section class="create" ng-show="createStation === true">
+			<form>
+				<md-input-container layout="row">
+					<input type="text" placeholder="Station Name" ng-model="$ctrl.currentUser.stationName">
+				</md-input-container>
+				<md-input-container layout="row">
+					<input type="text" placeholder="Vibes" ng-model="$ctrl.currentUser.stationTags">
+				</md-input-container>
+				<md-input-container layout="row">
+					<input type="url" placeholder="Soundcloud URL" ng-model="$ctrl.currentUser.stationUrl">
+				</md-input-container>
+				<md-button class="md-raised md-primary bottom-button" ng-click="$ctrl.submitStation()">{{$ctrl.submitStatus}}</md-button>
+			</form>
+		</section>
+
+	</md-content>
+
+</md-sidenav>
