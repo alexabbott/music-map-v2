@@ -77,7 +77,7 @@ app.component('map', {
 
           function setUserCoordinates() {
             $rootScope.currentUser.latLng = new google.maps.LatLng($rootScope.currentUser.coordinates.lat, $rootScope.currentUser.coordinates.lng);
-            $rootScope.map.panTo($rootScope.currentUser.coordinates);
+            // $rootScope.map.panTo($rootScope.currentUser.coordinates);
           }
 
           if (navigator.geolocation) {
