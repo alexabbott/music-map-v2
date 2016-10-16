@@ -1,6 +1,6 @@
 app.component('map', {
   templateUrl: '/components/map/map.html',
-  controller: ['$mdSidenav', '$rootScope', '$interval', function($mdSidenav, $rootScope, $interval) {
+  controller: ['$mdSidenav', '$rootScope', '$interval', '$window', function($mdSidenav, $rootScope, $interval, $window) {
     var ctrl = this;
 
     $rootScope.stationsInRange = [];
