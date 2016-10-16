@@ -50,10 +50,19 @@ $colorPrimary: #3F51B5;
 .play {
 	bottom: 0;
 	display: none;
+	font-size: 26px;
 	height: 20vh;
+  left: 50%;
 	margin: 0;
 	position: fixed;
-	width: 100vw;
+  transform: translateX(-50%);
+	width: 106vw;
+
+	.material-icons {
+		font-size: 30px;
+    margin: 4px 8px 0 0;
+    vertical-align: top;
+	}
 }
 
 md-content {
