@@ -1,6 +1,6 @@
 app.component('sidenav', {
   templateUrl: '/components/sidenav/sidenav.html',
-  controller: ['$timeout', '$rootScope', '$mdSidenav', '$firebaseObject', function($timeout, $rootScope, $mdSidenav, $firebaseObject) {
+  controller: ['$timeout', '$rootScope', '$mdSidenav', '$firebaseObject', '$mdToast', function($timeout, $rootScope, $mdSidenav, $firebaseObject, $mdToast) {
 
     var ctrl = this;
     ctrl.stations = $rootScope.stationsInRange;
@@ -43,12 +43,13 @@ app.component('sidenav', {
           ctrl.currentUser.stationTags = '';
           ctrl.currentUser.stationUrl = '';
 
-          // change button to show saved status and close side nav
-          ctrl.submitStatus = 'Saved!';
-          $timeout(function(){
-            ctrl.submitStatus = 'Submit';
-            $mdSidenav('right').close();
-          }, 2000);
+          // show toast and close side nav
+          $mdSidenav('right').close();
+          $mdToast.show(
+            $mdToast.simple()
+              .textContent('Station saved successfully!')
+              .hideDelay(3000)
+          );
         }, function(error) {
           console.log("Error:", error);
         });

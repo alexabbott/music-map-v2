@@ -49,7 +49,8 @@ app.component('map', {
           map: $rootScope.map,
           zIndex: 99,
           icon: icon,
-          animation: google.maps.Animation.DROP
+          animation: google.maps.Animation.DROP,
+          draggable: true
         });
       }
 
@@ -77,8 +78,7 @@ app.component('map', {
 
           function setUserCoordinates() {
             $rootScope.currentUser.latLng = new google.maps.LatLng($rootScope.currentUser.coordinates.lat, $rootScope.currentUser.coordinates.lng);
-            $rootScope.map.setCenter($rootScope.currentUser.coordinates);
-            checkStationsInRange();
+            $rootScope.map.panTo($rootScope.currentUser.coordinates);
           }
 
           if (navigator.geolocation) {
@@ -89,6 +89,7 @@ app.component('map', {
                 lng: position.coords.longitude
               };
               setUserCoordinates();
+              checkStationsInRange();
               $rootScope.addUserMarker($rootScope.currentUser.coordinates);
 
               // if there's a station in range, start playing it immediately
@@ -96,20 +97,26 @@ app.component('map', {
                 $rootScope.setStation($rootScope.stationsInRange[0].url);
               }
 
-              // check user's location every 5 seconds
-              $interval(function(){
+            }, function() {
+              // handleLocationError(true, infoWindow, map.getCenter());
+            })
+
+            $interval(function(){
+              navigator.geolocation.getCurrentPosition(function(position) {
+
                 $rootScope.currentUser.coordinates = {
                   lat: position.coords.latitude,
                   lng: position.coords.longitude
                 };
                 setUserCoordinates();
+                checkStationsInRange();
                 $rootScope.currentUser.marker.setPosition($rootScope.currentUser.latLng);
-                console.log('update user location', $rootScope.currentUser.coordinates);
-              },5000);
+                console.log('update user location', $rootScope.currentUser.marker.position.lat());
 
-            }, function() {
-              // handleLocationError(true, infoWindow, map.getCenter());
-            });
+              }, function() {
+                // handleLocationError(true, infoWindow, map.getCenter());
+              })
+            }, 5000);
           } else {
             // Browser doesn't support Geolocation
             // handleLocationError(false, infoWindow, map.getCenter());

@@ -19,14 +19,14 @@
 					<input type="text" placeholder="Station Name" ng-model="$ctrl.currentUser.stationName">
 				</md-input-container>
 				<md-input-container layout="row">
-					<input type="text" placeholder="Vibes" ng-model="$ctrl.currentUser.stationTags">
+					<input type="text" placeholder="Sounds like" ng-model="$ctrl.currentUser.stationTags">
 				</md-input-container>
 				<md-input-container layout="row">
 					<input type="url" placeholder="Soundcloud URL" ng-model="$ctrl.currentUser.stationUrl">
 				</md-input-container>
 				<div class="bottom-button">
-					<md-button ng-click="createStation = false">Cancel</md-button>
 					<md-button class="md-raised md-primary" ng-click="$ctrl.submitStation()">{{$ctrl.submitStatus}}</md-button>
+					<md-button ng-click="createStation = false">Cancel</md-button>
 				</div>
 			</form>
 		</section>
