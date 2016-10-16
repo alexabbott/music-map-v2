@@ -151,9 +151,13 @@ app.component('map', {
               checkStationsInRange();
               $rootScope.addUserMarker($rootScope.currentUser.coordinates);
 
-              // if there's a station in range, start playing it immediately
+              // if there's a station in range, start playing it immediately or show mobile play button
               if ($rootScope.stationsInRange.length > 0) {
                 $rootScope.setStation($rootScope.stationsInRange[0].url);
+
+                if ($window.innerWidth < 768) {
+                  angular.element(document.querySelector('.play')).css('display', 'block');
+                }
               }
 
             }, function() {
@@ -215,10 +219,6 @@ app.component('player', {
   controller: ['$rootScope', '$window', function($rootScope, $window) {
 
   	var ctrl = this;
-
-  	if ($window.innerWidth < 768) {
-		  angular.element(document.querySelector('.play')).css('display', 'block');
-  	}
 
   	$rootScope.setStation = function(url) {
 	    document.getElementById('player').setAttribute('src', url + 
