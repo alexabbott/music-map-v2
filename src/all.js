@@ -16,25 +16,9 @@ var app = angular.module('musicMap', ['firebase', 'ngMaterial'])
 .run(['$firebaseArray', '$firebaseObject', '$rootScope', function($firebaseArray, $firebaseObject, $rootScope) {
 
   $rootScope.ref = firebase.database().ref();
-  // download the data into a local object
   $rootScope.stations = $firebaseArray($rootScope.ref.child("stations"));
   $rootScope.users = $firebaseObject($rootScope.ref.child("users"));
   $rootScope.userStations = $firebaseObject($rootScope.ref.child("user-stations"));
-  // synchronize the object with a three-way data binding
-
-  $rootScope.stations.$watch(function(event) {
-    if (event.event === 'child_added') {
-      var newStationIndex = $rootScope.stations.$indexFor(event.key);
-      $rootScope.addMarker($rootScope.stations[newStationIndex].coordinates, '#FF0000', 1, $rootScope.stations[newStationIndex].radius);
-    }
-  });
-
-  $rootScope.setStation = function(url) {
-    document.getElementById('player').setAttribute('src', url + 
-          '&amp;auto_play=true&amp;hide_related=true&amp;show_comments=fakse&amp;show_user=faslse&amp;show_reposts=false&amp;visual=true');
-
-    $rootScope.nowPlaying = url;
-  }
 
 }]);
 
@@ -85,15 +69,19 @@ app.component('map', {
     function initMap() {
       $rootScope.map = new google.maps.Map(document.querySelector('#map'), {
         center: {lat: 40.729286, lng: -73.998625},
-        zoom: 14
+        zoom: 14,
+        disableDefaultUI: true
       });
 
-      $rootScope.addMarker = function(coordinates, color, zIndex, radius) {
+      var infowindow = new google.maps.InfoWindow();
+
+      $rootScope.addMarker = function(coordinates, color, zIndex, radius, icon, name) {
         var marker = new google.maps.Marker({
           position: coordinates,
           map: $rootScope.map,
           title: 'Hello World!',
-          zIndex: zIndex
+          zIndex: zIndex,
+          icon: icon
         });
 
         var radius = new google.maps.Circle({
@@ -106,6 +94,15 @@ app.component('map', {
           center: coordinates,
           radius: radius
         });
+
+        google.maps.event.addListener(marker, 'click', function() {
+          infowindow.setContent(name);
+          infowindow.open($rootScope.map, marker);
+        });
+
+        google.maps.event.addListener($rootScope.map, 'click', function() {
+          infowindow.close();
+        });
       }
 
       function checkStationsInRange() {
@@ -114,27 +111,18 @@ app.component('map', {
 
           // check to see which stations are in range
           if (google.maps.geometry.spherical.computeDistanceBetween($rootScope.currentUser.latLng, stationLatLng) < $rootScope.stations[i].radius) {
-            
             $rootScope.stationsInRange.push($rootScope.stations[i]);
-
           } else if (google.maps.geometry.spherical.computeDistanceBetween($rootScope.currentUser.latLng, stationLatLng) > $rootScope.stations[i].radius) {
-            
             $rootScope.stationsNotInRange.push($rootScope.stations[i]);
-
           }
-          console.log('in range', $rootScope.stationsInRange);
-          console.log('not range', $rootScope.stationsNotInRange);
         }
       }
 
       $rootScope.stations.$loaded()
         .then(function(data) {
-          console.log('loaded', data); // true
-
 
           if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
-
 
               $rootScope.currentUser = {};
 
@@ -145,10 +133,12 @@ app.component('map', {
               $rootScope.currentUser.latLng = new google.maps.LatLng($rootScope.currentUser.coordinates.lat, $rootScope.currentUser.coordinates.lng);
 
               $rootScope.map.setCenter($rootScope.currentUser.coordinates);
-              $rootScope.addMarker($rootScope.currentUser.coordinates, '#00FF00', 99, 200);
+
+              $rootScope.addMarker($rootScope.currentUser.coordinates, '#FF0000', 99, 0);
 
               checkStationsInRange();
 
+              // if there's a station in range, start playing it immediately
               if ($rootScope.stationsInRange) {
                 $rootScope.setStation($rootScope.stationsInRange[0].url);
               }
@@ -172,12 +162,34 @@ app.component('map', {
     ctrl.openMenu = function() {
       $mdSidenav('right').open();
     };
+
+    var stationIcon = {
+      url: 'images/music-icon.png',
+      size: new google.maps.Size(25, 25),
+      origin: new google.maps.Point(0, 0),
+      anchor: new google.maps.Point(12, 12)
+    }
+
+    // add markers as the stations are retrieved from the database
+    $rootScope.stations.$watch(function(event) {
+      if (event.event === 'child_added') {
+        var newStationIndex = $rootScope.stations.$indexFor(event.key);
+        $rootScope.addMarker($rootScope.stations[newStationIndex].coordinates, '#2D8A79', 1, $rootScope.stations[newStationIndex].radius, stationIcon, $rootScope.stations[newStationIndex].name);
+      }
+    });
   }]
 });
 app.component('player', {
   templateUrl: '/components/player/player.html',
-  controller: function() {
-  }
+  controller: ['$rootScope', function($rootScope) {
+
+  	$rootScope.setStation = function(url) {
+	    document.getElementById('player').setAttribute('src', url + 
+	          '&amp;auto_play=true&amp;hide_related=true&amp;show_comments=fakse&amp;show_user=faslse&amp;show_reposts=false&amp;visual=true');
+
+	    $rootScope.nowPlaying = url;
+	  }
+  }]
 });
 app.component('sidenav', {
   templateUrl: '/components/sidenav/sidenav.html',
